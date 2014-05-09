@@ -17,6 +17,9 @@ import android.provider.MediaStore;
 
 public class MainActivity extends Activity {
 
+    private Bitmap photoImg = null;
+    private final static String PHOTOIMG_KEY = "photoImg";
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,12 +29,18 @@ public class MainActivity extends Activity {
             getFragmentManager().beginTransaction()
                     .add(R.id.container, new PlaceholderFragment()).commit();
         }
+        else
+            photoImg = savedInstanceState.getParcelable(PHOTOIMG_KEY);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showPhoto();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
@@ -68,6 +77,12 @@ public class MainActivity extends Activity {
     }
 
     private final static int MY_REQUEST_FOR_PHOTO = 1234;
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(PHOTOIMG_KEY, photoImg);
+    }
 
     public void takePhoto(View view) {
         Intent intent = new Intent();
@@ -79,11 +94,17 @@ public class MainActivity extends Activity {
         switch (requestCode) {
         case MY_REQUEST_FOR_PHOTO:
             if (resultCode == RESULT_OK) {
-                ImageView photoView = (ImageView) findViewById(R.id.photo_view);
-                Bitmap img = (Bitmap)data.getExtras().get("data");
-                photoView.setImageBitmap(img);
+                photoImg = (Bitmap)data.getExtras().get("data");
+                showPhoto();
             }
             break;
+        }
+    }
+
+    private void showPhoto() {
+        if (photoImg != null) {
+            ImageView photoView = (ImageView) findViewById(R.id.photo_view);
+            photoView.setImageBitmap(photoImg);
         }
     }
 }
